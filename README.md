@@ -1,61 +1,164 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Telegram Bot Laravel Application
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This is a Laravel application that integrates with the Telegram Bot API to handle webhook events and send notifications.
 
-## About Laravel
+## Prerequisites
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Before you begin, ensure you have the following installed on your system:
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- A Telegram Bot Token (create one via [@BotFather](https://t.me/botfather))
+- An Ngrok Authentication Token (sign up at [Ngrok](https://ngrok.com/) and get your token from the dashboard)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Running the Application with Docker
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. Clone the Repository
 
-## Learning Laravel
+```bash
+git clone https://github.com/fortestslava13/telegram-bot-test.git
+cd telegram-bot-test
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 2. Environment Configuration
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Create a `.env` file by copying the example:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+cp .env.example .env
+```
 
-## Laravel Sponsors
+Update the following variables in your `.env` file:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```
+# Telegram Bot Configuration
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+TELEGRAM_BOT_WEBHOOK_SECRET=your_webhook_secret
+```
 
-### Premium Partners
+Also, update the NGROK_AUTHTOKEN in the docker-compose.yaml file with your Ngrok authentication token:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```yaml
+  ngrok:
+    image: ngrok/ngrok:latest
+    command: "http nginx:80"
+    environment:
+        NGROK_AUTHTOKEN: "your_ngrok_auth_token"
+```
 
-## Contributing
+### 3. Start the Docker Containers
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+docker-compose up -d
+```
 
-## Code of Conduct
+This will start the following services:
+- **app**: PHP application with Laravel
+- **nginx**: Web server
+- **mysql**: Database
+- **ngrok**: Exposes your local server to the internet (for Telegram webhooks)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 4. Install Dependencies and Run Migrations
 
-## Security Vulnerabilities
+```bash
+docker-compose exec app composer install
+docker-compose exec app php artisan key:generate
+docker-compose exec app php artisan migrate
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. Set Up Telegram Webhook
 
-## License
+Set up the webhook:
+```bash
+docker-compose exec app php artisan set-telegram-webhook
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Or manually set it using the TelegramService:
+
+Get your ngrok URL:
+1. Open http://localhost:4040 in your browser
+2. Copy the HTTPS URL displayed (e.g., https://xxxx-xxx-xxx-xx-xx.ngrok.io)
+
+```bash
+docker-compose exec app php artisan tinker
+```
+
+```php
+app(App\Services\TelegramService::class)->setWebhook('{ngrok_url}/api/telegram/webhook');
+```
+
+### 6. Testing the Application
+
+To run the tests:
+
+```bash
+docker-compose exec app php artisan test
+```
+
+## Available Commands
+
+The Telegram bot supports the following commands:
+- `/start` - Subscribe to notifications
+- `/stop` - Unsubscribe from notifications
+
+## API Documentation
+
+The application includes Swagger/OpenAPI documentation for the API endpoints. To access the documentation:
+
+1. Start the application with Docker:
+```bash
+docker-compose up -d
+```
+
+2. Access the Swagger UI at: http://localhost:8080/api/documentation
+
+The documentation provides detailed information about:
+- Available endpoints
+- Request parameters and formats
+- Response formats
+- Authentication requirements
+
+You can test the API directly from the Swagger UI interface.
+
+## Queue Worker
+
+The application uses Laravel's queue system for processing notifications. The queue worker is automatically started by Supervisor in the Docker container.
+
+## Troubleshooting
+
+### Database Connection Issues
+
+If you encounter database connection issues, ensure the MySQL container is running:
+
+```bash
+docker-compose ps
+```
+
+You can check the MySQL logs:
+
+```bash
+docker-compose logs mysql
+```
+
+### Webhook Not Working
+
+1. Verify your ngrok URL is correct and accessible
+2. Check the Laravel logs:
+
+```bash
+docker-compose exec app tail -f storage/logs/laravel.log
+```
+
+3. Ensure your Telegram Bot Token is correct
+4. Verify the webhook is set correctly:
+
+```bash
+curl -X GET https://api.telegram.org/bot{your_token}/getWebhookInfo
+```
+
+### Queue Not Processing
+
+Check the worker logs:
+
+```bash
+docker-compose exec app tail -f storage/logs/worker.log
+```

@@ -18,12 +18,13 @@ RUN apt-get update && \
     libxslt1-dev \
     libicu-dev \
     supervisor \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-install mysqli pdo pdo_mysql
-RUN docker-php-ext-install exif
-RUN docker-php-ext-enable mysqli
+RUN docker-php-ext-install exif zip
+RUN docker-php-ext-enable mysqli zip
 
 COPY ./worker.conf /etc/supervisor/conf.d/
 

@@ -5,10 +5,7 @@ services:
     build:
       context: ./docker/app
       dockerfile: Dockerfile
-    environment:
-      TELEGRAM_BOT_TOKEN: "!change me!"
-      TELEGRAM_BOT_WEBHOOK_SECRET: 123456
-    command: sh -c "/usr/bin/supervisord -c  /etc/supervisor/conf.d/worker.conf && composer install --ignore-platform-reqs && php-fpm"
+    command: sh -c "/usr/bin/supervisord -c  /etc/supervisor/conf.d/worker.conf && php-fpm"
     volumes:
       - ./:/var/www/html
       - ./docker/app/worker.conf:/etc/supervisor/conf.d/worker.conf
@@ -48,7 +45,7 @@ services:
     image: ngrok/ngrok:latest
     command: "http nginx:80"
     environment:
-        NGROK_AUTHTOKEN: 30N6A0D9YCopUvwJopt0cS3JahN_6D9k46zSJdKxT6bexFkaJ
+        NGROK_AUTHTOKEN: "!change me!"
     ports:
       - "4040:4040"
     networks:

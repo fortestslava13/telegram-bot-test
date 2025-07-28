@@ -13,7 +13,7 @@ use OpenApi\Annotations as OA;
  *     version="1.0.0",
  *     description="API for Telegram Bot webhook integration",
  *     @OA\Contact(
- *         email="admin@example.com"
+ *         email="fortestslava13@gmail.com"
  *     )
  * )
  */

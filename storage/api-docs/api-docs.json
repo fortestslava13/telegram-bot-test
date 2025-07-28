@@ -1,0 +1,144 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Telegram Bot API",
+        "description": "API for Telegram Bot webhook integration",
+        "contact": {
+            "email": "fortestslava13@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/telegram/webhook": {
+            "post": {
+                "tags": [
+                    "Telegram"
+                ],
+                "summary": "Process incoming Telegram webhook",
+                "description": "Handles incoming webhook requests from Telegram API",
+                "operationId": "handleWebhook",
+                "parameters": [
+                    {
+                        "name": "X-Telegram-Bot-Api-Secret-Token",
+                        "in": "header",
+                        "description": "Telegram webhook secret token for verification",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Telegram webhook payload",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "message"
+                                ],
+                                "properties": {
+                                    "message": {
+                                        "properties": {
+                                            "chat": {
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "Telegram chat ID",
+                                                        "type": "integer",
+                                                        "example": 123456789
+                                                    },
+                                                    "username": {
+                                                        "description": "Telegram username",
+                                                        "type": "string",
+                                                        "example": "username"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            "text": {
+                                                "description": "Command text",
+                                                "type": "string",
+                                                "example": "/start"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Webhook processed successfully"
+                    },
+                    "403": {
+                        "description": "Unauthorized - Invalid or missing webhook secret token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "This action is unauthorized."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "message.chat.id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The message.chat.id field is required."
+                                                    }
+                                                },
+                                                "message.chat.username": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The message.chat.username field is required."
+                                                    }
+                                                },
+                                                "message.text": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The message.text must be one of: /start, /stop."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Telegram",
+            "description": "Telegram"
+        }
+    ]
+}

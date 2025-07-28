@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'telegram' => [
+        'api_url' => 'https://api.telegram.org/',
+        'token' => env('TELEGRAM_BOT_TOKEN'),
+        'webhook_secret' => env('TELEGRAM_BOT_WEBHOOK_SECRET'),
+    ],
+
 ];
